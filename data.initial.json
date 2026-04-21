@@ -1,0 +1,22 @@
+{
+  "header": {
+    "siteName": "太阳的阳",
+    "copyright": "© 太阳的阳"
+  },
+  "overview": {
+    "columns": "3",
+    "items": []
+  },
+  "projects": [
+    { "name": "项目一", "columns": "3", "items": [] },
+    { "name": "项目二", "columns": "3", "items": [] },
+    { "name": "项目三", "columns": "2", "items": [] }
+  ],
+  "about": {
+    "image": null,
+    "bio": "（请在后台「关于我」里编辑这段介绍文字）",
+    "contact": "hello@example.com",
+    "clients": "",
+    "footer": ""
+  }
+}

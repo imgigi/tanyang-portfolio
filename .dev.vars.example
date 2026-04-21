@@ -1,0 +1,2 @@
+ADMIN_PASSWORD=dev
+SESSION_SECRET=dev-secret-change-me-xxxxxxxxxxxxxxxx

@@ -1,0 +1,10 @@
+# Cloudflare Pages 配置
+# - 本地 dev 由 `npm run dev` 的 --kv / --r2 flag 自动模拟
+# - KV / R2 的生产绑定在 Cloudflare Dashboard → Settings → Functions 做
+
+name = "tanyang-portfolio"
+compatibility_date = "2025-01-01"
+pages_build_output_dir = "public"
+
+[vars]
+SITE_ID = "tanyang"

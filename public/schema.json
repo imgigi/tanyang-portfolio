@@ -1,0 +1,124 @@
+{
+  "site": {
+    "title": "太阳的阳",
+    "siteId": "tanyang"
+  },
+  "sections": [
+    {
+      "id": "header",
+      "label": "站点设置",
+      "type": "group",
+      "fields": [
+        {
+          "id": "siteName",
+          "label": "站点名（左上角）",
+          "type": "text",
+          "placeholder": "太阳的阳"
+        },
+        {
+          "id": "copyright",
+          "label": "底部版权署名",
+          "type": "text",
+          "placeholder": "© 太阳的阳"
+        }
+      ]
+    },
+    {
+      "id": "overview",
+      "label": "精选作品（首页）",
+      "type": "group",
+      "fields": [
+        {
+          "id": "columns",
+          "label": "分栏数",
+          "type": "select",
+          "options": [
+            { "value": "1", "label": "1 列" },
+            { "value": "2", "label": "2 列" },
+            { "value": "3", "label": "3 列" },
+            { "value": "4", "label": "4 列" }
+          ],
+          "help": "默认 3 列，可按需调整"
+        },
+        {
+          "id": "items",
+          "label": "精选图片（可拖动排序）",
+          "type": "gallery",
+          "caption": false,
+          "help": "这些图会显示在「精选作品」首页，独立于项目。支持批量上传。"
+        }
+      ]
+    },
+    {
+      "id": "projects",
+      "label": "项目列表",
+      "type": "list",
+      "itemLabel": "项目",
+      "itemTitle": "name",
+      "fields": [
+        {
+          "id": "name",
+          "label": "项目名（中文）",
+          "type": "text",
+          "placeholder": "例如：山野"
+        },
+        {
+          "id": "columns",
+          "label": "分栏数",
+          "type": "select",
+          "options": [
+            { "value": "1", "label": "1 列" },
+            { "value": "2", "label": "2 列" },
+            { "value": "3", "label": "3 列" },
+            { "value": "4", "label": "4 列" }
+          ]
+        },
+        {
+          "id": "items",
+          "label": "项目图片（可拖动排序）",
+          "type": "gallery",
+          "caption": false
+        }
+      ]
+    },
+    {
+      "id": "about",
+      "label": "关于我",
+      "type": "group",
+      "fields": [
+        {
+          "id": "image",
+          "label": "个人照片",
+          "type": "image"
+        },
+        {
+          "id": "bio",
+          "label": "自我介绍（段落之间空一行）",
+          "type": "textarea",
+          "rows": 6,
+          "placeholder": "我是……\n\n专注于……"
+        },
+        {
+          "id": "contact",
+          "label": "联系方式（支持 HTML，可放 <a>）",
+          "type": "richtext",
+          "rows": 3,
+          "placeholder": "hello@example.com<br>+86 138-0000-0000"
+        },
+        {
+          "id": "clients",
+          "label": "合作客户（支持 HTML）",
+          "type": "richtext",
+          "rows": 3,
+          "placeholder": "合作客户：某品牌、某杂志、某机构"
+        },
+        {
+          "id": "footer",
+          "label": "底部小字（可留空）",
+          "type": "text",
+          "placeholder": "available to work worldwide"
+        }
+      ]
+    }
+  ]
+}

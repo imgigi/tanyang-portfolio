@@ -1,0 +1,13 @@
+{
+  "name": "tanyang-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler pages dev public --kv DATA --r2 IMAGES",
+    "deploy": "wrangler pages deploy public",
+    "seed": "node scripts/seed-data.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "^3.78.0"
+  }
+}
