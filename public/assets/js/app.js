@@ -6,6 +6,24 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({
   "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
 }[c]));
 
+// 规范化图片 URL：老数据可能是 /api/image/<key>，统一解析出裸 URL
+// 只有在同站（CF zone）下的 URL 才走 /cdn-cgi/image/
+const IMG_BASE = "https://img.ggjj.app";
+function resolveImg(url) {
+  if (!url) return "";
+  if (url.startsWith("/api/image/")) return IMG_BASE + "/" + url.slice("/api/image/".length);
+  return url;
+}
+// 用 CF Image Resizing 包一层；非 http 源（相对路径）或未知域名原样返回
+function rimg(url, w) {
+  const u = resolveImg(url);
+  if (!u || !u.startsWith("http")) return u;
+  return `/cdn-cgi/image/width=${w},format=auto,quality=85,fit=scale-down/${u}`;
+}
+function srcsetFor(url, widths) {
+  return widths.map(w => `${rimg(url, w)} ${w}w`).join(", ");
+}
+
 const SVG_CLOSE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>`;
 const SVG_PREV  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><polyline points="14 5 7 12 14 19"/></svg>`;
 const SVG_NEXT  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><polyline points="10 5 17 12 10 19"/></svg>`;
@@ -118,9 +136,12 @@ function galleryHtml(items, columns) {
   const cells = items.map((it, i) => {
     const url = (it && it.url) || "";
     if (!url) return "";
+    const src = rimg(url, 1200);
+    const srcset = srcsetFor(url, [600, 900, 1200, 1800]);
+    const sizes = `(max-width: 768px) 100vw, ${Math.round(100 / c)}vw`;
     return `
       <figure class="gallery__item" data-idx="${i}">
-        <img src="${esc(url)}" alt="${esc(it.caption || "")}" loading="lazy" />
+        <img src="${esc(src)}" srcset="${esc(srcset)}" sizes="${esc(sizes)}" alt="${esc(it.caption || "")}" loading="lazy" />
       </figure>
     `;
   }).join("");
@@ -169,7 +190,7 @@ function viewAbout() {
 
   return `
     <div class="page page--about">
-      ${img ? `<div class="about__photo about__block"><img src="${esc(img)}" alt=""></div>` : ""}
+      ${img ? `<div class="about__photo about__block"><img src="${esc(rimg(img, 900))}" srcset="${esc(srcsetFor(img, [600, 900, 1200]))}" sizes="(max-width: 768px) 100vw, 40vw" alt="" loading="lazy"></div>` : ""}
       <div class="about__text">
         ${bioHtml ? `<div class="about__bio about__block">${bioHtml}</div>` : ""}
         ${contact ? `<div class="about__contact about__block">${contact}</div>` : ""}
@@ -214,7 +235,7 @@ function openLightbox(items, startIdx) {
     <button class="lightbox__close" aria-label="close">${SVG_CLOSE}</button>
     <div class="lightbox__main">
       <button class="lightbox__nav lightbox__nav--prev" aria-label="prev">${SVG_PREV}</button>
-      <img class="lightbox__img" src="${esc(items[startIdx].url)}" alt="">
+      <img class="lightbox__img" src="${esc(rimg(items[startIdx].url, 2400))}" alt="">
       <button class="lightbox__nav lightbox__nav--next" aria-label="next">${SVG_NEXT}</button>
     </div>
     <div class="lightbox__footer">
@@ -234,7 +255,7 @@ function openLightbox(items, startIdx) {
     idx = (i + items.length) % items.length;
     imgEl.classList.add("is-fading");
     setTimeout(() => {
-      imgEl.src = items[idx].url;
+      imgEl.src = rimg(items[idx].url, 2400);
       imgEl.classList.remove("is-fading");
     }, 120);
     countEl.textContent = items.length > 1 ? `${idx + 1} / ${items.length}` : "";

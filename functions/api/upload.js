@@ -10,6 +10,7 @@ export async function onRequestPost({ request, env }) {
   if (!files.length) return json({ error: "no files" }, { status: 400 });
 
   const sid = siteId(env);
+  const base = (env.IMG_BASE_URL || "").replace(/\/+$/, "");
   const out = [];
   for (const f of files) {
     if (!(f instanceof File)) continue;
@@ -19,7 +20,8 @@ export async function onRequestPost({ request, env }) {
     await env.IMAGES.put(key, f.stream(), {
       httpMetadata: { contentType: f.type || "image/jpeg" },
     });
-    out.push({ key, url: `/api/image/${key}`, name: f.name, size: f.size });
+    const url = base ? `${base}/${key}` : `/api/image/${key}`;
+    out.push({ key, url, name: f.name, size: f.size });
   }
   return json({ files: out });
 }

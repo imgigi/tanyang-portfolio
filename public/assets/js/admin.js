@@ -588,9 +588,48 @@ function collectImageKeys(obj, out = []) {
 
 /* ---------- Upload / Delete ---------- */
 
+// 浏览器端压缩：长边限 MAX_DIM，JPEG quality=QUALITY
+// 典型 20MB 相机原图 → 500KB-1.5MB，上传/展示都更快
+const MAX_DIM = 2400;
+const QUALITY = 0.82;
+const COMPRESS_THRESHOLD = 512 * 1024;  // 小于 512KB 的图不压缩（已经够小）
+
+async function compressImage(file) {
+  if (!file.type.startsWith("image/")) return file;
+  // PNG 透明、GIF 动图、SVG 不压缩（保原样）
+  if (!/^image\/(jpe?g|webp|png)$/.test(file.type)) return file;
+  if (file.size < COMPRESS_THRESHOLD) return file;
+
+  let bitmap;
+  try {
+    bitmap = await createImageBitmap(file);
+  } catch {
+    return file;  // 解码失败兜底，原图上传
+  }
+
+  const { width: w, height: h } = bitmap;
+  const scale = Math.min(1, MAX_DIM / Math.max(w, h));
+  const tw = Math.round(w * scale);
+  const th = Math.round(h * scale);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = tw;
+  canvas.height = th;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(bitmap, 0, 0, tw, th);
+  bitmap.close?.();
+
+  const blob = await new Promise(res => canvas.toBlob(res, "image/jpeg", QUALITY));
+  if (!blob || blob.size >= file.size) return file;  // 压完反而更大，用原图
+  // 统一扩展名为 .jpg
+  const newName = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+  return new File([blob], newName, { type: "image/jpeg" });
+}
+
 async function uploadFiles(files) {
+  const compressed = await Promise.all(Array.from(files).map(compressImage));
   const fd = new FormData();
-  for (const f of files) fd.append("files", f);
+  for (const f of compressed) fd.append("files", f);
   const r = await fetch("/api/upload", { method: "POST", body: fd, credentials: "same-origin" });
   if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || "upload failed");
   const j = await r.json();

@@ -1,6 +1,6 @@
-// R2 读取代理，支持多段路径（如 /api/image/site-id/123-abc.jpg）
-// 通过 Pages Functions 代理，避免 bucket 开 public
-import { json, requireAuth } from "../../_shared.js";
+// R2 读取代理（共用 bucket 改造后保留作兼容 / 私有访问 fallback）
+// 生产图片应走 IMG_BASE_URL（R2 public domain），这个 GET 仅作老数据 fallback
+import { json, requireAuth, siteId } from "../../_shared.js";
 
 function buildKey(params) {
   if (!params || params.path == null) return "";
@@ -33,6 +33,9 @@ export async function onRequestDelete({ params, env, request }) {
   if (!env.IMAGES) return json({ error: "no r2" }, { status: 500 });
   const key = buildKey(params);
   if (!key) return json({ error: "bad key" }, { status: 400 });
+  // 共用 bucket 下，只允许删自己 siteId 前缀的对象
+  const prefix = siteId(env) + "/";
+  if (!key.startsWith(prefix)) return json({ error: "forbidden" }, { status: 403 });
   await env.IMAGES.delete(key);
   return json({ ok: true });
 }
