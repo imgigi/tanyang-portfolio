@@ -8,3 +8,11 @@ pages_build_output_dir = "public"
 
 [vars]
 SITE_ID = "tanyang"
+
+[[kv_namespaces]]
+binding = "DATA"
+id = "a211816d5f0b4fac8ec1ab7b54694230"
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "tanyang-img"
