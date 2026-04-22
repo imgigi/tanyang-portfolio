@@ -397,16 +397,50 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   .sidebar {
     position: static;
     height: auto;
-    padding: 32px 24px 24px;
-    gap: 28px;
+    padding: 20px 20px 16px;
+    gap: 14px;
     border-bottom: 1px solid var(--line);
   }
-  .nav { gap: 18px; }
-  .nav__group-label { padding-left: 0; }
-  .nav__empty { padding-left: 0; }
-  .content {
-    padding: 40px 24px 80px;
+  .brand { font-size: 18px; }
+
+  /* 手机版：导航横向铺开，项目子列表也横向紧凑 */
+  .nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 18px;
+    font-size: 13px;
+    letter-spacing: 0.08em;
   }
+  .nav__item,
+  .nav__sub {
+    padding: 0;
+  }
+  .nav__mark { display: none; }                 /* 手机不显示破折号，节省横向空间 */
+  .nav__group {
+    display: flex;
+    align-items: baseline;
+    gap: 8px 12px;
+    flex-wrap: wrap;
+  }
+  .nav__group-label {
+    padding: 0;
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+  }
+  .nav__sublist {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+  .nav__empty { padding: 0; }
+
+  .content {
+    padding: 24px 16px 64px;
+  }
+  .gallery { --gallery-gap: 12px; }
   .gallery--c3,
   .gallery--c4 { column-count: 2; }
   .lightbox__main { padding: 60px 16px 24px; }
@@ -415,8 +449,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   .site-footer { position: static; padding: 24px; text-align: center; }
 }
 
-@media (max-width: 480px) {
+/* ≤ 640：单栏铺满，图更大更舒适 */
+@media (max-width: 640px) {
   .gallery--c2,
   .gallery--c3,
   .gallery--c4 { column-count: 1; }
+  .gallery { --gallery-gap: 16px; }
 }
