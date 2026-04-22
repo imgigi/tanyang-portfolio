@@ -205,6 +205,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   flex-wrap: wrap;
   gap: var(--gallery-gap);
 }
+/* 不同行块之间的间距 = 块内图片间距 */
+.jg + .jg { margin-top: var(--gallery-gap); }
 
 .jg__item {
   flex: var(--aspect, 1) 1 0;
