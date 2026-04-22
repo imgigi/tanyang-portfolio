@@ -9,6 +9,7 @@ pages_build_output_dir = "public"
 [vars]
 SITE_ID = "tanyang"
 IMG_BASE_URL = "https://img.ggjj.app"
+MAX_IMAGES = "100"
 
 [[kv_namespaces]]
 binding = "DATA"
@@ -16,4 +17,4 @@ id = "a211816d5f0b4fac8ec1ab7b54694230"
 
 [[r2_buckets]]
 binding = "IMAGES"
-bucket_name = "zhimengsi"
+bucket_name = "ggjj-assets"

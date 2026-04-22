@@ -11,6 +11,23 @@ export async function onRequestPost({ request, env }) {
 
   const sid = siteId(env);
   const base = (env.IMG_BASE_URL || "").replace(/\/+$/, "");
+
+  // 按站配额拦截（MAX_IMAGES 未设则不限制）
+  const max = Number(env.MAX_IMAGES || 0);
+  if (max > 0) {
+    let count = 0, cursor;
+    do {
+      const r = await env.IMAGES.list({ prefix: `${sid}/`, cursor });
+      count += (r.objects || []).length;
+      cursor = r.truncated ? r.cursor : null;
+    } while (cursor);
+    if (count + files.length > max) {
+      return json({
+        error: `已达配额 ${count}/${max}，本次想传 ${files.length} 张，超出 ${count + files.length - max} 张。请先删除旧图再上传`,
+      }, { status: 413 });
+    }
+  }
+
   const out = [];
   for (const f of files) {
     if (!(f instanceof File)) continue;
