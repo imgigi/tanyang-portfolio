@@ -219,11 +219,49 @@ function initJustifiedGalleries() {
 
 /* ---------- Views ---------- */
 
+// 新结构：每个 section 下是 rows [{columns, items}]，每行独立渲染一个 justified gallery 块
+// 兼容旧结构：若 section 有 items + columns，包成一行
+function normalizeRows(section) {
+  if (!section) return [];
+  if (Array.isArray(section.rows)) return section.rows;
+  if (Array.isArray(section.items)) return [{ columns: section.columns || "3", items: section.items }];
+  return [];
+}
+
+function rowsHtml(rows, startIdxBase) {
+  if (!rows.length) return `<div class="empty">暂无作品，请到 <a href="/admin">/admin</a> 添加</div>`;
+  let idxCounter = startIdxBase || 0;
+  const blocks = rows.map(row => {
+    const items = (row.items || []).filter(x => x && x.url);
+    if (!items.length) return "";
+    const c = Math.max(1, Math.min(4, Number(row.columns) || 3));
+    const cells = items.map(it => {
+      const i = idxCounter++;
+      const src = rimg(it.url, 1400);
+      const srcset = srcsetFor(it.url, [600, 900, 1200, 1800]);
+      const sizes = `(max-width: 640px) 100vw, (max-width: 900px) 50vw, ${Math.round(100 / c)}vw`;
+      return `
+        <figure class="jg__item" data-idx="${i}" style="--aspect:1">
+          <img src="${esc(src)}" srcset="${esc(srcset)}" sizes="${esc(sizes)}" alt="${esc(it.caption || "")}" loading="lazy" />
+        </figure>
+      `;
+    }).join("");
+    return `<div class="jg" data-cols="${c}">${cells}</div>`;
+  }).filter(Boolean).join("");
+  return blocks || `<div class="empty">暂无作品，请到 <a href="/admin">/admin</a> 添加</div>`;
+}
+
+function flattenRows(rows) {
+  const out = [];
+  for (const r of rows) for (const it of (r.items || [])) if (it && it.url) out.push(it);
+  return out;
+}
+
 function viewOverview() {
-  const o = DATA.overview || {};
+  const rows = normalizeRows(DATA.overview);
   return `
     <div class="page page--gallery">
-      ${galleryHtml(o.items || [], o.columns || "3")}
+      ${rowsHtml(rows, 0)}
     </div>
   `;
 }
@@ -234,10 +272,11 @@ function viewProject(idx) {
   if (!p) {
     return `<div class="page"><div class="empty">项目不存在</div></div>`;
   }
+  const rows = normalizeRows(p);
   return `
     <div class="page page--gallery">
       <h1 class="page__title">${esc(p.name || `项目 ${idx + 1}`)}</h1>
-      ${galleryHtml(p.items || [], p.columns || "3")}
+      ${rowsHtml(rows, 0)}
     </div>
   `;
 }
@@ -274,10 +313,10 @@ function viewAbout() {
 
 function currentItems() {
   const r = currentRoute();
-  if (r.name === "overview") return (DATA.overview && DATA.overview.items) || [];
+  if (r.name === "overview") return flattenRows(normalizeRows(DATA.overview));
   if (r.name === "project") {
     const p = projects()[r.idx];
-    return (p && p.items) || [];
+    return flattenRows(normalizeRows(p));
   }
   return [];
 }
