@@ -75,11 +75,12 @@ function renderRoute() {
   `;
 
   // 入场动画 stagger
-  const items = app.querySelectorAll(".gallery__item, .about__block");
+  const items = app.querySelectorAll(".jg__item, .about__block");
   items.forEach((el, i) => {
     el.style.animationDelay = `${Math.min(i, 20) * 40}ms`;
   });
 
+  initJustifiedGalleries();
   initLightboxTargets();
   window.scrollTo(0, 0);
 }
@@ -126,7 +127,7 @@ function renderFooter() {
   return `<footer class="site-footer">${esc(txt)}</footer>`;
 }
 
-/* ---------- Gallery (masonry by CSS columns) ---------- */
+/* ---------- Gallery (justified: 每行等高、宽度拉满) ---------- */
 
 function galleryHtml(items, columns) {
   const c = Math.max(1, Math.min(4, Number(columns) || 3));
@@ -136,16 +137,84 @@ function galleryHtml(items, columns) {
   const cells = items.map((it, i) => {
     const url = (it && it.url) || "";
     if (!url) return "";
-    const src = rimg(url, 1200);
+    const src = rimg(url, 1400);
     const srcset = srcsetFor(url, [600, 900, 1200, 1800]);
-    const sizes = `(max-width: 768px) 100vw, ${Math.round(100 / c)}vw`;
+    const sizes = `(max-width: 640px) 100vw, (max-width: 900px) 50vw, ${Math.round(100 / c)}vw`;
     return `
-      <figure class="gallery__item" data-idx="${i}">
+      <figure class="jg__item" data-idx="${i}" style="--aspect:1">
         <img src="${esc(src)}" srcset="${esc(srcset)}" sizes="${esc(sizes)}" alt="${esc(it.caption || "")}" loading="lazy" />
       </figure>
     `;
   }).join("");
-  return `<div class="gallery gallery--c${c}">${cells}</div>`;
+  return `<div class="jg" data-cols="${c}">${cells}</div>`;
+}
+
+/* 桌面按配置栏数；900-640 最多 2 栏；<640 强制 1 栏 */
+function effectiveCols(configured) {
+  const w = window.innerWidth;
+  if (w < 640) return 1;
+  if (w < 900) return Math.min(configured, 2);
+  return configured;
+}
+
+function initJustifiedGalleries() {
+  app.querySelectorAll(".jg").forEach(container => {
+    const configured = Math.max(1, Math.min(4, Number(container.dataset.cols) || 3));
+
+    const imgs = Array.from(container.querySelectorAll("img"));
+    imgs.forEach(img => {
+      const setAspect = () => {
+        const w = img.naturalWidth || 1;
+        const h = img.naturalHeight || 1;
+        const fig = img.closest(".jg__item");
+        if (fig) fig.style.setProperty("--aspect", (w / h).toFixed(4));
+        layout();
+      };
+      if (img.complete && img.naturalWidth) setAspect();
+      else img.addEventListener("load", setAspect, { once: true });
+    });
+
+    function layout() {
+      const cols = effectiveCols(configured);
+      container.dataset.effCols = cols;
+      container.querySelectorAll(".jg__break").forEach(el => el.remove());
+      const figs = Array.from(container.querySelectorAll(".jg__item"));
+      figs.forEach(f => f.classList.remove("is-lastrow-short"));
+
+      const total = figs.length;
+      figs.forEach((fig, i) => {
+        if ((i + 1) % cols === 0 && i + 1 !== total) {
+          const br = document.createElement("div");
+          br.className = "jg__break";
+          fig.after(br);
+        }
+      });
+
+      const lastRowCount = total % cols;
+      const fullRows = Math.floor(total / cols);
+      if (lastRowCount > 0 && fullRows > 0) {
+        const firstRowH = figs[0].getBoundingClientRect().height;
+        if (firstRowH > 0) {
+          container.style.setProperty("--row-h", firstRowH + "px");
+          for (let i = total - lastRowCount; i < total; i++) {
+            figs[i].classList.add("is-lastrow-short");
+          }
+        }
+      }
+    }
+
+    layout();
+    let rafId = null;
+    const onResize = () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(layout);
+    };
+    window.addEventListener("resize", onResize);
+    container._jgCleanup = () => {
+      window.removeEventListener("resize", onResize);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  });
 }
 
 /* ---------- Views ---------- */
@@ -214,7 +283,7 @@ function currentItems() {
 }
 
 function initLightboxTargets() {
-  app.querySelectorAll(".gallery__item").forEach(el => {
+  app.querySelectorAll(".jg__item").forEach(el => {
     el.addEventListener("click", () => {
       const i = Number(el.dataset.idx);
       openLightbox(currentItems(), i);

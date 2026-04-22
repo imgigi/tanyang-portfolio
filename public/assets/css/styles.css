@@ -198,42 +198,51 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 .empty a { border-bottom: 1px solid currentColor; }
 
-/* ---------- Gallery (CSS columns masonry) ---------- */
+/* ---------- Gallery (Justified: 每行等高、宽度拉满) ---------- */
 
-.gallery {
-  column-gap: var(--gallery-gap);
-  column-fill: balance;
+.jg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gallery-gap);
 }
 
-.gallery--c1 { column-count: 1; }
-.gallery--c2 { column-count: 2; }
-.gallery--c3 { column-count: 3; }
-.gallery--c4 { column-count: 4; }
-
-.gallery__item {
-  break-inside: avoid;
-  margin: 0 0 var(--gallery-gap);
-  cursor: zoom-in;
+.jg__item {
+  flex: var(--aspect, 1) 1 0;
+  aspect-ratio: var(--aspect, 1);
+  min-width: 0;
+  background: #efebdf;            /* 加载占位色，与暖白底呼应 */
   overflow: hidden;
+  cursor: zoom-in;
   opacity: 0;
   animation: itemIn .55s cubic-bezier(.22,.8,.28,1) forwards;
 }
 
-@keyframes itemIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.gallery__item img {
+.jg__item img {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
+  object-fit: cover;
   transition: opacity .35s ease, transform 1.2s cubic-bezier(.22,.8,.28,1);
 }
 
-.gallery__item:hover img {
-  opacity: .88;
+.jg__item:hover img {
+  opacity: .9;
   transform: scale(1.012);
+}
+
+/* 最后一行不足 N 张：按首行已算出的行高靠左固定高度 */
+.jg__item.is-lastrow-short {
+  flex: 0 0 auto;
+  height: var(--row-h);
+  width: calc(var(--row-h) * var(--aspect, 1));
+  aspect-ratio: auto;
+}
+
+.jg__break { flex-basis: 100%; height: 0; margin: 0; padding: 0; }
+
+@keyframes itemIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ---------- About Page ---------- */
@@ -440,19 +449,14 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   .content {
     padding: 24px 16px 64px;
   }
-  .gallery { --gallery-gap: 12px; }
-  .gallery--c3,
-  .gallery--c4 { column-count: 2; }
+  .jg { --gallery-gap: 12px; }
   .lightbox__main { padding: 60px 16px 24px; }
   .lightbox__nav--prev { left: 4px; }
   .lightbox__nav--next { right: 4px; }
   .site-footer { position: static; padding: 24px; text-align: center; }
 }
 
-/* ≤ 640：单栏铺满，图更大更舒适 */
+/* ≤ 640：间距更舒服（栏数由 JS 自动降到 1） */
 @media (max-width: 640px) {
-  .gallery--c2,
-  .gallery--c3,
-  .gallery--c4 { column-count: 1; }
-  .gallery { --gallery-gap: 16px; }
+  .jg { --gallery-gap: 14px; }
 }
