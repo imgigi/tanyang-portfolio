@@ -137,6 +137,40 @@
           "placeholder": "available to work worldwide"
         }
       ]
+    },
+    {
+      "id": "backstage",
+      "label": "花絮",
+      "type": "group",
+      "fields": [
+        {
+          "id": "rows",
+          "label": "行（每行独立分栏 + 图片）",
+          "type": "list",
+          "itemLabel": "行",
+          "itemTitle": "columns",
+          "help": "每新增一行 = 一个独立画廊块；每行自己选 1-4 列。行内图超过列数会自动换到下一行（仍属于这一块）。",
+          "fields": [
+            {
+              "id": "columns",
+              "label": "本行分栏数",
+              "type": "select",
+              "options": [
+                { "value": "1", "label": "1 列" },
+                { "value": "2", "label": "2 列" },
+                { "value": "3", "label": "3 列" },
+                { "value": "4", "label": "4 列" }
+              ]
+            },
+            {
+              "id": "items",
+              "label": "本行图片（可拖动排序、批量上传）",
+              "type": "gallery",
+              "caption": false
+            }
+          ]
+        }
+      ]
     }
   ]
 }

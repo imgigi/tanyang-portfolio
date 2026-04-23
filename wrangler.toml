@@ -9,7 +9,7 @@ pages_build_output_dir = "public"
 [vars]
 SITE_ID = "tanyang"
 IMG_BASE_URL = "https://img.ggjj.app"
-MAX_IMAGES = "100"
+MAX_IMAGES = "500"
 
 [[kv_namespaces]]
 binding = "DATA"

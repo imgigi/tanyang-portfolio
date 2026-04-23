@@ -1,5 +1,5 @@
 // 太阳的阳 — 摄影作品集
-// 路由：#/ (overview) / #/project/:idx / #/about
+// 路由：#/ (overview) / #/project/:idx / #/about / #/backstage
 const app = document.getElementById("app");
 
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({
@@ -49,6 +49,7 @@ function currentRoute() {
   const raw = (location.hash || "").replace(/^#\/?/, "");
   if (!raw) return { name: "overview" };
   if (raw === "about") return { name: "about" };
+  if (raw === "backstage") return { name: "backstage" };
   const m = raw.match(/^project\/(\d+)$/);
   if (m) return { name: "project", idx: Number(m[1]) };
   return { name: "overview" };
@@ -65,6 +66,7 @@ function renderRoute() {
   if (r.name === "overview") main = viewOverview();
   else if (r.name === "project") main = viewProject(r.idx);
   else if (r.name === "about") main = viewAbout();
+  else if (r.name === "backstage") main = viewBackstage();
 
   app.innerHTML = `
     <div class="layout">
@@ -115,6 +117,7 @@ function renderSidebar(r) {
         <div class="nav__sublist">${projLinks || `<span class="nav__empty">（暂无项目）</span>`}</div>
       </div>
       ${navItem("#/about", "关于我", r.name === "about")}
+      ${navItem("#/backstage", "花絮", r.name === "backstage")}
     </nav>
   `;
 }
@@ -281,6 +284,15 @@ function viewProject(idx) {
   `;
 }
 
+function viewBackstage() {
+  const rows = normalizeRows(DATA.backstage);
+  return `
+    <div class="page page--gallery">
+      ${rowsHtml(rows, 0)}
+    </div>
+  `;
+}
+
 function viewAbout() {
   const a = DATA.about || {};
   const img = a.image && a.image.url ? a.image.url : "";
@@ -314,6 +326,7 @@ function viewAbout() {
 function currentItems() {
   const r = currentRoute();
   if (r.name === "overview") return flattenRows(normalizeRows(DATA.overview));
+  if (r.name === "backstage") return flattenRows(normalizeRows(DATA.backstage));
   if (r.name === "project") {
     const p = projects()[r.idx];
     return flattenRows(normalizeRows(p));

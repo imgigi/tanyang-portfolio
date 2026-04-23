@@ -18,5 +18,8 @@
     "contact": "hello@example.com",
     "clients": "",
     "footer": ""
+  },
+  "backstage": {
+    "rows": []
   }
 }
